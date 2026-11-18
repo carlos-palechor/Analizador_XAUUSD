@@ -1,0 +1,30 @@
+[mt5]
+# Déjelo vacío para usar el terminal MetaTrader 5 detectado por el paquete oficial.
+terminal_path = ""
+initialize_timeout_ms = 60000
+
+[symbol]
+logical_name = "XAUUSD"
+aliases = ["XAUUSD", "GOLD"]
+# Fije este valor si la detección automática encuentra más de un candidato válido.
+real_name = ""
+
+[discovery]
+recent_bars = 1440
+timeframe = "M1"
+# Consultas pequeñas de solo lectura, no una descarga masiva.
+history_probe_lookback_days = [7, 30, 90, 180, 365, 730, 1460, 2920]
+history_probe_window_hours = 4
+# Los ticks se sondean en una fase separada porque algunos brókeres tardan al cargarlos.
+probe_tick_history = false
+
+[output]
+reports_directory = "reports"
+
+[storage]
+# Archivos locales CSV para investigación; no es una base de datos.
+raw_m1_directory = "data/raw/m1"
+
+[sessions]
+# Sesiones reales exportadas desde MT5 con ExportSymbolSessions.mq5.
+snapshot_path = "data/reference/sessions/xau_collector_symbol_sessions.csv"
