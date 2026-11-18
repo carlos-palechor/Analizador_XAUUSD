@@ -37,6 +37,7 @@ from xau_collector.services.key_levels import KeyLevelsBrain
 from xau_collector.services.m1_collection import M1CollectionService
 from xau_collector.services.m1_quality import M1QualityValidator
 from xau_collector.services.market_data_quality_brain import MarketDataQualityBrain
+from xau_collector.services.session_brain import SessionBrain
 from xau_collector.services.session_calendar import Mt5QuoteSessionCalendar
 from xau_collector.services.symbol_resolver import SymbolResolver
 from xau_collector.services.technical_structure import (
@@ -91,6 +92,9 @@ def _parser() -> argparse.ArgumentParser:
     analysis = subcommands.add_parser("analyze-history")
     analysis.add_argument("--root", type=Path, default=Path("data/raw"), help="Históricos locales")
     analysis.add_argument("--at", dest="cutoff", help="Corte UTC: YYYY-MM-DDTHH:MM")
+    session_analysis = subcommands.add_parser("analyze-sessions-history")
+    session_analysis.add_argument("--root", type=Path, default=Path("data/raw"))
+    session_analysis.add_argument("--at", required=True, help="Corte UTC: YYYY-MM-DDTHH:MM")
     import_history = subcommands.add_parser("import-history")
     import_history.add_argument("--root", type=Path, default=Path("data/raw"))
     import_history.add_argument("--symbol", default="XAUUSDm")
@@ -181,6 +185,15 @@ def main(argv: Sequence[str] | None = None) -> int:
                     }
                 )
             )
+            return 0
+        if args.command == "analyze-sessions-history":
+            cutoff = datetime.strptime(args.at, "%Y-%m-%dT%H:%M").replace(tzinfo=UTC)
+            report = SessionBrain().run(
+                CsvMarketDataRepository(args.root),
+                InstrumentIdentity("Exness", "Exness Technologies Ltd", "XAUUSDm", "mt5_csv"),
+                cutoff,
+            )
+            print(render_json(report.to_dict()))
             return 0
         if args.command == "import-history":
             importer = PostgresHistoricalImporter(os.environ.get("XAU_DATABASE_URL", ""))
